@@ -5,8 +5,6 @@ const twitterBtn = document.querySelector('.twitter-button');
 const newQuoteBtn = document.querySelector('.new-quote');
 const loader = document.querySelector('.loader');
 
-let apiQuotes = [];
-
 function loading() {
   loader.hidden = false;
   quoteContainer.hidden = true;
@@ -17,33 +15,26 @@ function complete() {
   loader.hidden = true;
 }
 
-function newQuote() {
+async function getQuote() {
   loading();
-  const quote = apiQuotes[Math.floor(Math.random() * apiQuotes.length)];
-
-  authorText.textContent = quote.author ? quote.author : 'Unknown';
-
-  if (quote.text.length > 120) {
-    quoteText.classList.add('long-quote');
-  } else {
-    quoteText.classList.remove('long-quote');
-  }
-
-  quoteText.textContent = quote.text;
-  complete();
-}
-
-async function getQuotes() {
-  loading();
-  // const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-  const apiUrl = 'https://type.fit/api/quotes';
+  const proxyUrl = 'https://radiant-hamlet-09681.herokuapp.com/';
+  const apiUrl = 'http://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json';
   try {
-    const response = await fetch(apiUrl);
-    apiQuotes = await response.json();
-    newQuote();
+    const response = await fetch(proxyUrl + apiUrl);
+    const data = await response.json();
+
+    authorText.textContent = data.quoteAuthor ? data.quoteAuthor : 'Unknown';
+
+    if (data.quoteText.length > 120) {
+      quoteText.classList.add('long-quote');
+    } else {
+      quoteText.classList.remove('long-quote');
+    }
+
+    quoteText.textContent = data.quoteText;
+    complete();
   } catch (error) {
     getQuote();
-    console.log('whoops, no quote', error);
   }
 }
 
@@ -52,7 +43,7 @@ function tweetQuote() {
   window.open(twitterUrl, '_blank');
 }
 
-newQuoteBtn.addEventListener('click', newQuote);
+newQuoteBtn.addEventListener('click', getQuote);
 twitterBtn.addEventListener('click', tweetQuote);
 
-getQuotes();
+getQuote();
